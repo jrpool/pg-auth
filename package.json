@@ -6,8 +6,7 @@
   "private": false,
   "version": "0.0.0",
   "scripts": {
-    "start": "DEBUG=json-api-promise:* node ./app",
-    "startwin": "set DEBUG=json-api-promise:* node ./app",
+    "start": "node ./app",
     "lint": "eslint ./app.js; exit 0"
   },
   "dependencies": {

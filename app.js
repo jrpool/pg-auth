@@ -8,17 +8,16 @@ const formParser = require('body-parser').urlencoded(
 const cookieParser = require('cookie-parser');
 
 // Define a function that returns an HTML document.
-const htmlDoc = bodyContent => {
+const htmlDoc = (title, bodyContent) =>
   `<!DOCTYPE html><html lang='en'>\n\n
     <head>
       <meta charset='utf-8'>
-      <title>Welcome back to Cookie1</title>
+      <title>${title}</title>
     </head>\n\n
     <body>
       ${bodyContent}
     </body>\n\n
-  </html>`
-};
+  </html>`;
 
 // Define a function that returns the non-personalized document.
 const anonForm = () => {
@@ -30,8 +29,8 @@ const anonForm = () => {
     >\n\n
       <p>
         <label>Your name here
-          <
-            input name='userName' type='text' size='70'
+          <input
+            name='userName' type='text' size='70'
             minlength='1' maxlength='70'
             placeholder='Your name here'
           >
@@ -39,20 +38,20 @@ const anonForm = () => {
       </p>\n\n
       <p><button type='submit'>Save my name!</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc(bodyContent);
+  return htmlDoc('Welcome to Cookie1', bodyContent);
 };
 
 // Define a function that returns the personalized document.
 const knownForm = userName => {
-  const bodyContent = `<h3>Welcome back, ${userName}</h3>\n\n
+  const bodyContent = `<h3>Welcome back, ${userName}!</h3>\n\n
     <form
       name='userClear'
       action='/'
       method='post'
     >\n\n
-      <p><button type='submit'>Clear name</button></p>\n\n
+      <p><button name='clearName' type='submit'>Clear name</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc(bodyContent);
+  return htmlDoc('Welcome back to Cookie1', bodyContent);
 };
 
 /// /// REQUEST ROUTES /// ///
@@ -60,33 +59,34 @@ const knownForm = userName => {
 // Render the appropriate form.
 app.get(
   '/',
-  cookieParser,
+  cookieParser(),
   (req, res) => {
     if (req.cookies.userName) {
       res.send(knownForm(req.cookies.userName));
     }
     else {
-      res.send(anonForm);
+      res.send(anonForm());
     }
   }
 );
 
 // Handle a form submission.
 app.post(
-  '/submit-form',
-  cookieParser,
+  '/',
+  cookieParser(),
   formParser,
   (req, res) => {
     // Handle the non-personalized (name-submission) form.
-    if (req.body.forms[0] === 'userInfo') {
+    if (req.body.userName !== undefined) {
       const userName = req.body.userName;
-      res.cookie('userName', userName);
+      // Store the name in a cookie for 60 days.
+      res.cookie('userName', userName, {maxAge: 5184000000});
       res.send(knownForm(userName));
     }
-    else {
-      // Handle the personalized (cookie-clearing) form.
-      res.clearCookie(req.cookies.userName);
-      res.send(anonForm);
+    // Handle the personalized (cookie-clearing) form.
+    else if (req.body.clearName !== undefined) {
+      res.clearCookie('userName');
+      res.send(anonForm());
     }
   }
 );

@@ -19,7 +19,7 @@ This application demonstrates the use of the [`express` package][exp] and the [`
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
 
-The application fulfills the requirements of the App1 exercise in the “Secure Session Cookie” module in Phase 2 of the [Learners Guild][lg] curriculum.
+The application fulfills the requirements of the App1 compenent of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
 
 ## Installation and Setup
 
