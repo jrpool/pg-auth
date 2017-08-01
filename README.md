@@ -1,5 +1,5 @@
-# cookie4
-Express application that manages sessions with encrypted cookies.
+# pg-auth
+Express server that manages authentication with PostgreSQL.
 
 ## Project Members
 
@@ -15,7 +15,7 @@ app.js
 
 ### General
 
-This application demonstrates the use of the [`express` package][exp], the [`cookie-parser` package][cp], and the [`cryptr` package][cryptr] to create an application that serves and processes POST forms and manages sessions with encrypted cookies.
+This application demonstrates the use of the [`express` package][exp], the [`cookie-session` package][cs], the [`bcrypt` package][bcrypt], and the [`pg-promise` package][pgpr] to create a server that serves and processes POST forms and manages authentication and sessions with encrypted passwords.
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
 

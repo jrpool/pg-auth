@@ -1,6 +1,6 @@
 {
-  "name": "cookie4",
-  "description": "Express application that stores plain-text cookies.",
+  "name": "pg-auth",
+  "description": "Express server that manages authentication with PostgreSQL.",
   "author": "Jonathan Pool",
   "license": "MIT",
   "private": false,
@@ -10,22 +10,24 @@
     "lint": "eslint ./app.js; exit 0"
   },
   "dependencies": {
-    "body-parser": "~1.16.0",
-    "cookie-parser": "~1.4.3",
+    "bcrypt": ">=1.0.2",
+    "body-parser": ">=1.16.0",
+    "cookie-session": ">=2.0.0-beta.2",
     "cryptr": ">=2.0.0",
-    "express": "~4.14.1"
+    "express": ">=4.14.1",
+    "pg-promise": ">=6.3.6"
   },
   "devDependencies": {
     "babel-preset-es2015": ">=6.24.1",
     "babel-register": ">=6.24.1",
-    "eslint": "^4.0.0"
+    "eslint": ">=4.0.0"
   },
   "bugs": {
-    "url": "https://github.com/jrpool/cookie4.git/issues"
+    "url": "https://github.com/jrpool/pg-auth.git/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jrpool/cookie4.git"
+    "url": "https://github.com/jrpool/pg-auth.git"
   },
   "babel": {
     "presets": [
