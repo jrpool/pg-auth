@@ -1,5 +1,5 @@
 # cookie2
-Express application that stores plain-text cookies
+Express application that stores a JSON-format cookie.
 
 ## Project Members
 
@@ -15,11 +15,11 @@ app.js
 
 ### General
 
-This application demonstrates the use of the [`express` package][exp] and the [`cookie-parser` package][cp] to create an application that serves and processes POST forms and manages plain-text cookies.
+This application demonstrates the use of the [`express` package][exp] and the [`cookie-parser` package][cp] to create an application that serves and processes POST forms and manages a JSON-format cookie.
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
 
-The application fulfills the requirements of the App2 compenent of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
+The application fulfills the requirements of the “App 2—Storing data in cookies” compenent of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
 
 ## Installation and Setup
 
@@ -57,7 +57,7 @@ Complete the form that is served and submit it.
 
 The response to your submission will be another, personalized form allowing you to request the deletion of the information that you provided. If you make that request, the response will be the original form.
 
-The application stores your information in cookies, set to expire in 60 days, among your browser’s files. As long as the cookies remain in existence, subsequent visits to the same URL with the same browser instance will elicit the personalized form. If you prevent the storage or transmission of that cookie, cause the cookie to be deleted after creation, or access the application from an incognito browser window, subsequent visits to the URL will elicit the original, non-personalized form.
+The application stores your information in a cookie, set to expire in 60 days, among your browser’s files. As long as the cookie remains in existence, subsequent visits to the same URL with the same browser instance will elicit the personalized form. If you prevent the storage or transmission of that cookie, cause the cookie to be deleted after creation, or access the application from an incognito browser window, subsequent visits to the URL will elicit the original, non-personalized form.
 
 To stop the application, send a SIGINT signal to its process, by entering the keypress CONTROL-C in the terminal window.
 

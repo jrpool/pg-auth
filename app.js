@@ -21,29 +21,44 @@ const htmlDoc = (title, bodyContent) =>
 
 // Define a function that returns the non-personalized document.
 const anonForm = () => {
-  const bodyContent = `<h3>Welcome, stranger! What’s your name?</h3>\n\n
+  const bodyContent = `<h3>Welcome, stranger! Tell us about yourself.</h3>\n\n
     <form
       name='userInfo'
       action='/'
       method='post'
     >\n\n
       <p>
-        <label>Your name here
+        <label>First name
           <input
-            name='userName' type='text' size='70'
-            minlength='1' maxlength='70'
-            placeholder='Your name here'
+            name='firstName' type='text' size='40'
+            minlength='1' maxlength='40'
+            placeholder='First name'
+          >
+        </label>
+        <label>Last name
+          <input
+            name='lastName' type='text' size='40'
+            minlength='0' maxlength='40'
+            placeholder='Last name'
+          >
+        </label>
+        <label>Favorite color
+          <input
+            name='favoriteColor' type='text' size='40'
+            minlength='1' maxlength='40'
+            placeholder='Favorite color'
           >
         </label>
       </p>\n\n
-      <p><button type='submit'>Save my name!</button></p>\n\n
+      <p><button type='submit'>That’s me!</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome to Cookie1', bodyContent);
+  return htmlDoc('Welcome to Cookie2', bodyContent);
 };
 
 // Define a function that returns the personalized document.
-const knownForm = userName => {
-  const bodyContent = `<h3>Welcome back, ${userName}!</h3>\n\n
+const knownForm = (firstName, lastName, favoriteColor) => {
+  const fullName = firstName + lastName.length ? ' ' + lastName : '';
+  const bodyContent = `<h3>Welcome back, ${fullName}! I bet your favorite color is ${favoriteColor}.</h3>\n\n
     <form
       name='userClear'
       action='/'
@@ -51,7 +66,7 @@ const knownForm = userName => {
     >\n\n
       <p><button name='clearName' type='submit'>Clear name</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome back to Cookie1', bodyContent);
+  return htmlDoc('Welcome back to Cookie2', bodyContent);
 };
 
 /// /// REQUEST ROUTES /// ///
@@ -76,16 +91,18 @@ app.post(
   cookieParser(),
   formParser,
   (req, res) => {
-    // Handle the non-personalized (name-submission) form.
-    if (req.body.userName !== undefined) {
-      const userName = req.body.userName;
-      // Store the name in a cookie for 60 days.
-      res.cookie('userName', userName, {maxAge: 5184000000});
-      res.send(knownForm(userName));
+    // Handle the non-personalized (information-submission) form.
+    if (req.body.firstName !== undefined) {
+      // Store the submitted data in a cookie for 60 days.
+      res.cookie('userData', JSON.stringify(req.body), {maxAge: 5184000000});
+      // Respond with the personalized form.
+      res.send(knownForm(
+        req.body.firstName, req.body.lastName, req.body.favoriteColor
+      ));
     }
     // Handle the personalized (cookie-clearing) form.
     else if (req.body.clearName !== undefined) {
-      res.clearCookie('userName');
+      res.clearCookie('userData');
       res.send(anonForm());
     }
   }
