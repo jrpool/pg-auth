@@ -2,10 +2,18 @@
 const app = require('express')();
 
 // Import required modules.
+const fs = require('fs');
 const formParser = require('body-parser').urlencoded(
-  {extended: false, inflate: false, limit: 150, parameterLimit: 3}
+  {extended: false, inflate: false, limit: 300, parameterLimit: 3}
 );
 const cookieParser = require('cookie-parser');
+const Cryptr = require('cryptr');
+
+// Retrieve or define the encryption key.
+const key = fs.readFileSync('./key.txt', 'utf8') || 'cookieencryptionkey';
+
+// Create an encryption/decryption object.
+const cryptr = new Cryptr(key);
 
 // Define a function that returns an HTML document.
 const htmlDoc = (title, bodyContent) =>
@@ -56,7 +64,7 @@ const anonForm = () => {
       </p>\n\n
       <p><button type='submit'>That’s me!</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome to Cookie3', bodyContent);
+  return htmlDoc('Welcome to Cookie4', bodyContent);
 };
 
 // Define a function that returns the personalized document.
@@ -72,13 +80,13 @@ const knownForm = (firstName, lastName, favoriteColor) => {
         <button name='clearInfo' type='submit' value='1'>Clear my info</button>
       </p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome back to Cookie3', bodyContent);
+  return htmlDoc('Welcome back to Cookie4', bodyContent);
 };
 
 // Define a function that manages a session for a GET request.
 const getSessionManager = (req, res, next) => {
   if (req.cookies.userData) {
-    req.session = JSON.parse(req.cookies.userData);
+    req.session = JSON.parse(cryptr.decrypt(req.cookies.userData));
   }
   next();
 };
@@ -88,7 +96,9 @@ const postSessionManager = (req, res, next) => {
   if (req.body.firstName) {
     req.session = req.body;
     // Store the submitted data in a cookie for 60 days.
-    res.cookie('userData', JSON.stringify(req.body), {maxAge: 5184000000});
+    res.cookie(
+      'userData', cryptr.encrypt(JSON.stringify(req.body)), {maxAge: 5184000000}
+    );
   }
   else if (req.body.clearInfo) {
     res.clearCookie('userData');
