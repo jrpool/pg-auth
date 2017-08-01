@@ -1,6 +1,6 @@
 {
-  "name": "cookie1",
-  "description": "Express application that stores a plain-text cookie.",
+  "name": "cookie2",
+  "description": "Express application that stores plain-text cookies.",
   "author": "Jonathan Pool",
   "license": "MIT",
   "private": false,
