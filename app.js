@@ -86,7 +86,13 @@ const knownForm = (firstName, lastName, favoriteColor) => {
 // Define a function that manages a session for a GET request.
 const getSessionManager = (req, res, next) => {
   if (req.cookies.userData) {
-    req.session = JSON.parse(cryptr.decrypt(req.cookies.userData));
+    const originalCookie = cryptr.decrypt(req.cookies.userData);
+    try {
+      req.session = JSON.parse(originalCookie);
+    }
+    catch (err) {
+      console.log('Cookie in a request was not decryptable.')
+    }
   }
   next();
 };
