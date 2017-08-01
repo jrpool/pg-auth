@@ -1,5 +1,5 @@
-# cookie3
-Express application that manages sessions.
+# cookie4
+Express application that manages sessions with encrypted cookies.
 
 ## Project Members
 
@@ -15,11 +15,11 @@ app.js
 
 ### General
 
-This application demonstrates the use of the [`express` package][exp] and the [`cookie-parser` package][cp] to create an application that serves and processes POST forms and manages sessions.
+This application demonstrates the use of the [`express` package][exp], the [`cookie-parser` package][cp], and the [`cryptr` package][cryptr] to create an application that serves and processes POST forms and manages sessions with encrypted cookies.
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
 
-The application fulfills the requirements of the “App 3—An insecure session” compenent of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
+The application fulfills the requirements of the “App 4—A secure session” component of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
 
 ## Installation and Setup
 
@@ -33,17 +33,19 @@ Make that parent directory your working directory, by executing, for example:
 
     `cd ~/Documents/projects/cookies`
 
-2. Clone this project’s repository into it, thereby creating the project directory, named `app3`, by executing:
+2. Clone this project’s repository into it, thereby creating the project directory, named `app4`, by executing:
 
-    `git clone https://github.com/jrpool/cookie2.git app3`
+    `git clone https://github.com/jrpool/cookie2.git app4`
 
 2. Make the project directory your working directory by executing:
 
-    `cd app3`
+    `cd app4`
 
 3. Install required dependencies (you can see them listed in `package.json`) by executing:
 
     `npm i`
+
+4. Create a file named `key.txt` in the `app4` directory. Populate that file with any secret key of your choice for encryption. The application will use the first 32 bytes of it, or all of it if shorter, for the encryption and decryption of cookies.
 
 ## Usage and Examples
 
@@ -57,12 +59,13 @@ Complete the form that is served and submit it.
 
 The response to your submission will be another, personalized form allowing you to request the deletion of the information that you provided. If you make that request, the response will be the original form.
 
-The application stores your information in a cookie, set to expire in 60 days, among your browser’s files. As long as the cookie remains in existence, subsequent visits to the same URL with the same browser instance will elicit the personalized form. If you prevent the storage or transmission of that cookie, cause the cookie to be deleted after creation, or access the application from an incognito browser window, subsequent visits to the URL will elicit the original, non-personalized form.
+The application stores your information in a cookie, set to expire in 60 days, among your browser’s files. As long as the cookie remains in existence, subsequent visits to the same URL with the same browser instance will elicit the personalized form. If you prevent the storage or transmission of that cookie, cause the cookie to be deleted after creation, or access the application from an incognito browser window, subsequent visits to the URL will elicit the original, non-personalized form. If you change the content of the `key.txt` file after it has been used to encrypt a cookie, that cookie will no longer be valid and the application will disregard it.
 
 To stop the application, send a SIGINT signal to its process, by entering the keypress CONTROL-C in the terminal window.
 
 To perform linting, execute `npm run lint`.
 
 [cp]: https://www.npmjs.com/package/cookie-parser
+[cryptr]: https://www.npmjs.com/package/cryptr
 [exp]: https://www.npmjs.com/package/express
 [lg]: https://www.learnersguild.org
