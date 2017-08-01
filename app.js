@@ -68,7 +68,9 @@ const knownForm = (firstName, lastName, favoriteColor) => {
       action='/'
       method='post'
     >\n\n
-      <p><button name='clearInfo' type='submit'>Clear my info</button></p>\n\n
+      <p>
+        <button name='clearInfo' type='submit' value='1'>Clear my info</button>
+      </p>\n\n
     </form>\n\n`;
   return htmlDoc('Welcome back to Cookie3', bodyContent);
 };
@@ -78,6 +80,7 @@ const getSessionManager = (req, res, next) => {
   if (req.cookies.userData) {
     req.session = JSON.parse(req.cookies.userData);
   }
+  next();
 };
 
 // Define a function that manages a session for a POST request.
@@ -90,6 +93,7 @@ const postSessionManager = (req, res, next) => {
   else if (req.body.clearInfo) {
     res.clearCookie('userData');
   }
+  next();
 };
 
 /// /// REQUEST ROUTES /// ///
@@ -100,7 +104,7 @@ app.get(
   cookieParser(),
   getSessionManager,
   (req, res) => {
-    if (req.session.firstName) {
+    if (req.session) {
       const userData = req.session;
       res.send(knownForm(
         userData.firstName, userData.lastName, userData.favoriteColor
@@ -116,18 +120,18 @@ app.get(
 app.post(
   '/',
   cookieParser(),
-  postSessionManager,
   formParser,
+  postSessionManager,
   (req, res) => {
     // Handle the non-personalized (information-submission) form.
-    if (req.body.firstName !== undefined) {
+    if (req.body.firstName) {
       // Respond with the personalized form.
       res.send(knownForm(
         req.body.firstName, req.body.lastName, req.body.favoriteColor
       ));
     }
     // Handle the personalized (cookie-clearing) form.
-    else if (req.body.clearInfo !== undefined) {
+    else if (req.body.clearInfo) {
       res.send(anonForm());
     }
   }
