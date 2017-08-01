@@ -1,5 +1,5 @@
-# cookie2
-Express application that stores a JSON-format cookie.
+# cookie3
+Express application that manages sessions.
 
 ## Project Members
 
@@ -15,11 +15,11 @@ app.js
 
 ### General
 
-This application demonstrates the use of the [`express` package][exp] and the [`cookie-parser` package][cp] to create an application that serves and processes POST forms and manages a JSON-format cookie.
+This application demonstrates the use of the [`express` package][exp] and the [`cookie-parser` package][cp] to create an application that serves and processes POST forms and manages sessions.
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
 
-The application fulfills the requirements of the “App 2—Storing data in cookies” compenent of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
+The application fulfills the requirements of the “App 3—An insecure session” compenent of the Secure Session Cookie exercise in the “Adding State to HTTP” module in Phase 2 of the [Learners Guild][lg] curriculum.
 
 ## Installation and Setup
 
@@ -33,13 +33,13 @@ Make that parent directory your working directory, by executing, for example:
 
     `cd ~/Documents/projects/cookies`
 
-2. Clone this project’s repository into it, thereby creating the project directory, named `app2`, by executing:
+2. Clone this project’s repository into it, thereby creating the project directory, named `app3`, by executing:
 
-    `git clone https://github.com/jrpool/cookie2.git app2`
+    `git clone https://github.com/jrpool/cookie2.git app3`
 
 2. Make the project directory your working directory by executing:
 
-    `cd app2`
+    `cd app3`
 
 3. Install required dependencies (you can see them listed in `package.json`) by executing:
 
