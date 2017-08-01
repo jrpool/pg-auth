@@ -56,7 +56,7 @@ const anonForm = () => {
       </p>\n\n
       <p><button type='submit'>That’s me!</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome to Cookie2', bodyContent);
+  return htmlDoc('Welcome to Cookie3', bodyContent);
 };
 
 // Define a function that returns the personalized document.
@@ -70,7 +70,26 @@ const knownForm = (firstName, lastName, favoriteColor) => {
     >\n\n
       <p><button name='clearInfo' type='submit'>Clear my info</button></p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome back to Cookie2', bodyContent);
+  return htmlDoc('Welcome back to Cookie3', bodyContent);
+};
+
+// Define a function that manages a session for a GET request.
+const getSessionManager = (req, res, next) => {
+  if (req.cookies.userData) {
+    req.session = JSON.parse(req.cookies.userData);
+  }
+};
+
+// Define a function that manages a session for a POST request.
+const postSessionManager = (req, res, next) => {
+  if (req.body.firstName) {
+    req.session = req.body;
+    // Store the submitted data in a cookie for 60 days.
+    res.cookie('userData', JSON.stringify(req.body), {maxAge: 5184000000});
+  }
+  else if (req.body.clearInfo) {
+    res.clearCookie('userData');
+  }
 };
 
 /// /// REQUEST ROUTES /// ///
@@ -79,9 +98,13 @@ const knownForm = (firstName, lastName, favoriteColor) => {
 app.get(
   '/',
   cookieParser(),
+  getSessionManager,
   (req, res) => {
-    if (req.cookies.userName) {
-      res.send(knownForm(req.cookies.userName));
+    if (req.session.firstName) {
+      const userData = req.session;
+      res.send(knownForm(
+        userData.firstName, userData.lastName, userData.favoriteColor
+      ));
     }
     else {
       res.send(anonForm());
@@ -93,12 +116,11 @@ app.get(
 app.post(
   '/',
   cookieParser(),
+  postSessionManager,
   formParser,
   (req, res) => {
     // Handle the non-personalized (information-submission) form.
     if (req.body.firstName !== undefined) {
-      // Store the submitted data in a cookie for 60 days.
-      res.cookie('userData', JSON.stringify(req.body), {maxAge: 5184000000});
       // Respond with the personalized form.
       res.send(knownForm(
         req.body.firstName, req.body.lastName, req.body.favoriteColor
@@ -106,7 +128,6 @@ app.post(
     }
     // Handle the personalized (cookie-clearing) form.
     else if (req.body.clearInfo !== undefined) {
-      res.clearCookie('userData');
       res.send(anonForm());
     }
   }
