@@ -3,7 +3,7 @@ const app = require('express')();
 
 // Import required modules.
 const formParser = require('body-parser').urlencoded(
-  {extended: false, inflate: false, limit: 100, parameterLimit: 2}
+  {extended: false, inflate: false, limit: 150, parameterLimit: 3}
 );
 const cookieParser = require('cookie-parser');
 
@@ -35,6 +35,8 @@ const anonForm = () => {
             placeholder='First name'
           >
         </label>
+      </p>
+      <p>
         <label>Last name
           <input
             name='lastName' type='text' size='40'
@@ -42,6 +44,8 @@ const anonForm = () => {
             placeholder='Last name'
           >
         </label>
+      </p>
+      <p>
         <label>Favorite color
           <input
             name='favoriteColor' type='text' size='40'
@@ -57,14 +61,14 @@ const anonForm = () => {
 
 // Define a function that returns the personalized document.
 const knownForm = (firstName, lastName, favoriteColor) => {
-  const fullName = firstName + lastName.length ? ' ' + lastName : '';
+  const fullName = firstName + (lastName.length ? ' ' + lastName : '');
   const bodyContent = `<h3>Welcome back, ${fullName}! I bet your favorite color is ${favoriteColor}.</h3>\n\n
     <form
       name='userClear'
       action='/'
       method='post'
     >\n\n
-      <p><button name='clearName' type='submit'>Clear name</button></p>\n\n
+      <p><button name='clearInfo' type='submit'>Clear my info</button></p>\n\n
     </form>\n\n`;
   return htmlDoc('Welcome back to Cookie2', bodyContent);
 };
@@ -101,7 +105,7 @@ app.post(
       ));
     }
     // Handle the personalized (cookie-clearing) form.
-    else if (req.body.clearName !== undefined) {
+    else if (req.body.clearInfo !== undefined) {
       res.clearCookie('userData');
       res.send(anonForm());
     }
