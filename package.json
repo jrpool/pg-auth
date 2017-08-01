@@ -1,5 +1,5 @@
 {
-  "name": "cookie2",
+  "name": "cookie4",
   "description": "Express application that stores plain-text cookies.",
   "author": "Jonathan Pool",
   "license": "MIT",
@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "~1.16.0",
     "cookie-parser": "~1.4.3",
+    "cryptr": ">=2.0.0",
     "express": "~4.14.1"
   },
   "devDependencies": {
@@ -20,11 +21,11 @@
     "eslint": "^4.0.0"
   },
   "bugs": {
-    "url": "https://github.com/jrpool/cookie1.git/issues"
+    "url": "https://github.com/jrpool/cookie4.git/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jrpool/cookie1.git"
+    "url": "https://github.com/jrpool/cookie4.git"
   },
   "babel": {
     "presets": [
