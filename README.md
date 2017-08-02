@@ -15,19 +15,21 @@ app.js
 
 ### General
 
-This application demonstrates the use of the [`express` package][exp], the [`cookie-session` package][cs], the [`bcrypt` package][bcrypt], the [`cryptr` package][cryptr], and the [`pg-promise` package][pgpr] to create a server that serves and processes POST forms and manages authentication and sessions with encrypted passwords and encrypted cookies.
+This application demonstrates the use of the [`express` package][exp], the [`isemail` package][isemail], the [`cookie-session` package][cs], the [`bcryptjs` package][bc], the [`cryptr` package][cryptr], and the [`pg-promise` package][pgpr] to create a server that serves and processes POST forms and manages authentication and sessions with encrypted passwords and encrypted cookies.
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
+
+The application contains only a subset of the functions that an authentication management application requires. Missing functionalities include terminating the user’s registration, changing the user’s password, changing the user’s email address, protecting the registrant from impersonation, and reminding the registered user of a forgotten password or email address.
 
 The application fulfills the requirements of the “HTTP Authentication” module in Phase 2 of the [Learners Guild][lg] curriculum.
 
 ### Implementation notes
 
-This implementation uses quasi-random integers as identifiers of users. It guarantees the uniqueness of each identifier by drawing it from a unique set of integers. The size of the set determines how difficult it is to guess an identifier. In this demonstration implementation, the set has size 100.
+This implementation uses quasi-random integers as identifiers of users. It guarantees the uniqueness of each identifier by drawing it from a unique set of integers. The size of the set determines how difficult it is to guess an identifier. In this demonstration implementation, the set has size 1000.
 
 The cookie stored and retrieved by the application contains an encryption of the user’s identifier and nothing else.
 
-The remainder of the persistent information about the user is stored in the PostgreSQL database. The user’s password, however, is not stored there. Instead, a 60-character hash of the password, including a plain-text salt, is stored there and is used for the validation of a user-supplied password. A new 
+The remainder of the persistent information about the user is stored in the PostgreSQL database. The user’s password, however, is not stored there. Instead, a 60-character hash of the password, including a plain-text salt, is stored there and is used for the validation of a user-supplied password. A new salt is generated for each registration.
 
 ## Installation and Setup
 
@@ -71,10 +73,11 @@ To stop the application, send a SIGINT signal to its process, by entering the ke
 
 To perform linting, execute `npm run lint`.
 
-[bcrypt]: https://www.npmjs.com/package/bcrypt
+[bc]: https://www.npmjs.com/package/bcryptjs
 [cp]: https://www.npmjs.com/package/cookie-parser
 [cryptr]: https://www.npmjs.com/package/cryptr
 [cs]: https://www.npmjs.com/package/cookie-session
 [exp]: https://www.npmjs.com/package/express
+[isemail]: https://www.npmjs.com/package/isemail
 [lg]: https://www.learnersguild.org
 [pgpr]: https://www.npmjs.com/package/pg-promise
