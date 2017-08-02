@@ -1,5 +1,5 @@
 // Import required modules.
-const pgp = require('pg-promise');
+const pgp = require('pg-promise')();
 const {handleMessage, errorHandlerFn, messages} = require('./messages');
 
 // Create the pgauth database and its owner.
