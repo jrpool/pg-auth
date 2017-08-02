@@ -91,7 +91,7 @@ const getSessionManager = (req, res, next) => {
       req.session = JSON.parse(originalCookie);
     }
     catch (err) {
-      console.log('Cookie in a request was not decryptable.')
+      console.log('Cookie in a request was not decryptable.');
     }
   }
   next();

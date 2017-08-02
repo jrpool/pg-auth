@@ -18,14 +18,14 @@ exports.handleMessage = (messages, messageKey, handler, fromTo) => {
     handler(message);
   }
   else {
-    console.log(message);
+    console.log(message + '\n');
   }
 };
 
 // Define a function that returns a handler for an error message.
-const errorHandlerFn = err => {
+exports.errorHandlerFn = err => {
   return message => {
-    console.log(message + err.message);
+    console.log(message + err.message + '\n');
   };
 };
 
@@ -51,6 +51,7 @@ exports.messages = {
   'shortpw': 'Your proposed password is too short.',
   'bademail': 'The address is not a valid email address.',
   'badlogins': 'The email address or password is incorrect.',
-  'dbinit': 'The database has been created.',
+  'dbinit': 'The database and its owner have been created.',
+  'dbdrop': 'The database and its owner have been deleted.',
   'error': 'An error has occurred in «unit». Error message:\n'
 };
