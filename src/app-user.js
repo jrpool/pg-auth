@@ -6,8 +6,9 @@ const fs = require('fs');
 const formParser = require('body-parser').urlencoded(
   {extended: false, inflate: false, limit: 300, parameterLimit: 3}
 );
-const cookieParser = require('cookie-parser');
-const Cryptr = require('cryptr');
+const cookieSession = require('cookie-session');
+const bcryptjs = require('bcryptjs');
+const {handleMessage, errorHandlerFn, messages} = require('./messages');
 
 // Retrieve or define the encryption key.
 const key = fs.readFileSync('./key.txt', 'utf8') || 'cookieencryptionkey';
@@ -17,70 +18,105 @@ const cryptr = new Cryptr(key);
 
 // Define a function that returns an HTML document.
 const htmlDoc = (title, bodyContent) =>
-  `<!DOCTYPE html><html lang='en'>\n\n
+  `<!DOCTYPE html><html lang='en'>\n
     <head>
       <meta charset='utf-8'>
       <title>${title}</title>
-    </head>\n\n
+    </head>\n
     <body>
       ${bodyContent}
-    </body>\n\n
+    </body>\n
   </html>`;
 
-// Define a function that returns the non-personalized document.
-const anonForm = () => {
-  const bodyContent = `<h3>Welcome, stranger! Tell us about yourself.</h3>\n\n
-    <form
-      name='userInfo'
-      action='/'
-      method='post'
-    >\n\n
-      <p>
-        <label>First name
-          <input
-            name='firstName' type='text' size='40'
-            minlength='1' maxlength='40'
-            placeholder='First name'
-          >
-        </label>
-      </p>
-      <p>
-        <label>Last name
-          <input
-            name='lastName' type='text' size='40'
-            minlength='0' maxlength='40'
-            placeholder='Last name'
-          >
-        </label>
-      </p>
-      <p>
-        <label>Favorite color
-          <input
-            name='favoriteColor' type='text' size='40'
-            minlength='1' maxlength='40'
-            placeholder='Favorite color'
-          >
-        </label>
-      </p>\n\n
-      <p><button type='submit'>That’s me!</button></p>\n\n
-    </form>\n\n`;
-  return htmlDoc('Welcome to Cookie4', bodyContent);
+// Define a function that returns the non-personalized home document.
+const anonHome = () => {
+  const bodyContent = `<h3>${messages.anongreet}</h3>\n
+    <h4><a href='/register'>${messages.reg}</a></h4>\n
+    <h4><a href='/login'>${messages.login}</a></h4>\n`;
+  return htmlDoc(messages.anonhome, bodyContent);
 };
 
-// Define a function that returns the personalized document.
-const knownForm = (firstName, lastName, favoriteColor) => {
-  const fullName = firstName + (lastName.length ? ' ' + lastName : '');
-  const bodyContent = `<h3>Welcome back, ${fullName}! I bet your favorite color is ${favoriteColor}.</h3>\n\n
+// Define a function that returns the personalized home document.
+const memberHome = email => {
+  const bodyContent = `<h3>
+    ${handleMessage(messages, 'knowngreet', '=', ['«email»', email])}
+    </h3>\n
+    <h4><a href='/logout'>${handleMessage(messages, 'logout')}</a></h4>\n`;
+  return htmlDoc(messages.knownhome, bodyContent);
+};
+
+// Define a function that returns the registration form.
+const registrationForm = error => {
+  const bodyContent = `<h3>${messages.regpage}</h3>\n
+    ${error ? '<h2>' + messages[error] + '</h2>\n' : '';}
     <form
-      name='userClear'
-      action='/'
+      name='registration'
+      action='/registration'
       method='post'
     >\n\n
       <p>
-        <button name='clearInfo' type='submit' value='1'>Clear my info</button>
+        <label>${messages.email}
+          <input
+            name='email' type='email' size='60'
+            minlength='5' maxlength='60'
+            placeholder='${emailholder}'
+          >
+        </label>
+      </p>
+      <p>
+        <label>${messages.pw0}
+          <input
+            name='password' type='password' size='60'
+            minlength='5' maxlength='60'
+          >
+        </label>
+      </p>
+      <p>
+        <label>${messages.pw1}
+          <input
+            name='repassword' type='password' size='60'
+            minlength='5' maxlength='60'
+          >
+        </label>
+      </p>
+      <p>
+        <button name='register' type='submit' value='1'>${messages.reg}</button>
       </p>\n\n
     </form>\n\n`;
-  return htmlDoc('Welcome back to Cookie4', bodyContent);
+  return htmlDoc(messages.regpage, bodyContent);
+};
+
+// Define a function that returns the login form.
+const loginForm = error => {
+  const bodyContent = `<h3>${messages.logpage}</h3>\n
+    ${error ? '<h2>' + messages[error] + '</h2>\n' : '';}
+    <form
+      name='login'
+      action='/login'
+      method='post'
+    >\n\n
+      <p>
+        <label>Your email address
+          <input
+            name='email' type='email' size='60'
+            minlength='5' maxlength='60'
+            placeholder='you@domain.tld'
+          >
+        </label>
+      </p>
+      <p>
+        <label>Your password
+          <input
+            name='password' type='password' size='60'
+            minlength='5' maxlength='60'
+          >
+        </label>
+      </p>
+      <p>
+        <button name='login' type='submit' value='1'>${messages.login}</button>
+      </p>\n\n
+    </form>\n\n`;
+  return htmlDoc(${messages.logpage}, bodyContent);
 };
 
 // Define a function that manages a session for a GET request.
@@ -91,7 +127,7 @@ const getSessionManager = (req, res, next) => {
       req.session = JSON.parse(originalCookie);
     }
     catch (err) {
-      console.log('Cookie in a request was not decryptable.');
+      handleMessage(messages, 'badcookie');
     }
   }
   next();

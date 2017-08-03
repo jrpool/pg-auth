@@ -14,7 +14,10 @@ exports.handleMessage = (messages, messageKey, handler, fromTo) => {
   if (fromTo) {
     message = message.replace(RegExp(fromTo[0], 'g'), fromTo[1]);
   }
-  if (handler) {
+  if (handler === '=') {
+    return message;
+  }
+  else if (handler) {
     handler(message);
   }
   else {
@@ -31,9 +34,14 @@ exports.errorHandlerFn = err => {
 
 // Messages in English.
 exports.messages = {
+  'anonhome': 'Welcome to the Club',
+  'knownhome': 'Welcome Back to the Club',
+  'regpage': 'Membership Registration',
+  'loginpage': 'Member Login',
   'anongreet': 'Hello, stranger.',
   'knowngreet': 'Welcome back, «email»',
   'email': 'Your email address',
+  'emailholder': 'username@domain.tld',
   'pw': 'Your password',
   'pw0': 'A new password (5 or more characters)',
   'pw1': 'The same new password again',
@@ -53,5 +61,6 @@ exports.messages = {
   'badlogins': 'The email address or password is incorrect.',
   'dbinit': 'The database and its owner have been created.',
   'dbdrop': 'The database and its owner have been deleted.',
-  'error': 'An error has occurred in «unit». Error message:\n'
+  'error': 'An error has occurred in «unit». Error message:\n',
+  'badcookie': 'The cookie in a request was not decryptable.'
 };
