@@ -44,7 +44,7 @@ const memberHome = email => {
 // Define a function that returns the registration form.
 const registrationForm = error => {
   const bodyContent = `<h3>${messages.regpage}</h3>\n
-    ${error ? '<h2>' + messages[error] + '</h2>\n' : '';}
+    ${error ? '<h2>' + error + '</h2>\n' : ''}
     <form
       name='registration'
       action='/registration'
@@ -85,7 +85,7 @@ const registrationForm = error => {
 // Define a function that returns the login form.
 const loginForm = error => {
   const bodyContent = `<h3>${messages.logpage}</h3>\n
-    ${error ? '<h2>' + messages[error] + '</h2>\n' : '';}
+    ${error ? '<h2>' + error + '</h2>\n' : ''}
     <form
       name='login'
       action='/login'
@@ -96,7 +96,7 @@ const loginForm = error => {
           <input
             name='email' type='email' size='60'
             minlength='5' maxlength='60'
-            placeholder='you@domain.tld'
+            placeholder='${messages.emailholder}'
           >
         </label>
       </p>
@@ -112,7 +112,7 @@ const loginForm = error => {
         <button name='login' type='submit' value='1'>${messages.login}</button>
       </p>\n\n
     </form>\n\n`;
-  return htmlDoc(${messages.logpage}, bodyContent);
+  return htmlDoc(messages.logpage, bodyContent);
 };
 
 // /// SESSION MANAGEMENT /// //

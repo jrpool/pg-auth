@@ -14,10 +14,9 @@ const dbmake = pgp(cnmake);
 const cnschema = {
   host: 'localhost',
   port: 5432,
-  user: 'pgauthmanager'
+  user: 'pgauthmanager',
   database: 'pgauth'
 };
-const dbmake = pgp(cnmake);
 const dbschema = pgp(cnschema);
 
 // Identify the required queries for creating the database and its owner.
@@ -52,8 +51,7 @@ dbmake.task('dbmake', task => {
 
 // Create the database schema.
 dbschema.task('dbschema', task => {
-  return task.none(new QueryFile('../src/schema.sql'));
-    })
+  return task.none(new pgp.QueryFile('../src/schema.sql'))
     .then(() => {
       pgp.end();
       return handleMessage(messages, 'dbfilled');
