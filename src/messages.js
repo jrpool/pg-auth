@@ -37,7 +37,7 @@ exports.messages = {
   'anonhome': 'Welcome to the Club',
   'knownhome': 'Welcome Back to the Club',
   'regpage': 'Membership Registration',
-  'loginpage': 'Member Login',
+  'logpage': 'Member Login',
   'anongreet': 'Hello, stranger.',
   'knowngreet': 'Welcome back, «email»',
   'email': 'Your email address',
