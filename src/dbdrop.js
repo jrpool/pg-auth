@@ -26,7 +26,7 @@ db.task('dbinit', task => {
     })
     .catch(err => {
       handleMessage(
-        messages, 'error', errorHandlerFn(err), ['«unit»', 'dbdropped']
+        messages, 'error', errorHandlerFn(err), ['«unit»', 'dbdrop']
       );
       pgp.end();
     });
