@@ -1,14 +1,14 @@
-// Create a server application.
-const app = require('express')();
+// /// DEPENDENCIES /// ///
 
-// Import required modules.
+const app = require('express')();
 const formParser = require('body-parser').urlencoded(
   {extended: false, inflate: false, limit: 300, parameterLimit: 3}
 );
 const cookieSession = require('cookie-session');
+const pgp = require('pg-promise')();
 const bcryptjs = require('bcryptjs');
 const {handleMessage, errorHandlerFn, messages} = require('./messages');
-const pgp = require('pg-promise')();
+const {isPositiveInt, isPositiveIntRange} = require('./validate');
 
 // /// DOCUMENT TEMPLATES /// ///
 
@@ -115,7 +115,36 @@ const loginForm = error => {
   return htmlDoc(messages.logpage, bodyContent);
 };
 
-// /// SESSION MANAGEMENT /// //
+// /// UTILITIES /// //
+
+// Define a function that creates and returns a database instance.
+const db = () => {
+  const cn = {
+    host: 'localhost',
+    port: 5432,
+    user: 'pgauthmanager',
+    database: 'pgauth'
+  };
+  return pgp(cn);
+};
+
+/*
+  Define a function that returns a promise resolved with the user’s email
+  address if logged in, or null if not.
+*/
+const userEmail = req => {
+  const db = db();
+  if (
+    req.session.isPopulated && req.session.id && isPositiveInt(req.session.id)
+  ) {
+    return db.task('get user email from database', task => {
+      return task.one('select email from users where id = ' + req.session.id);
+    })
+    .catch(err => {
+      errorHandlerFn(err);
+    }
+  }
+};
 
 // Configure session management for secure 60-day cookies.
 app.use(cookieSession({
@@ -129,78 +158,91 @@ app.use(cookieSession({
   overwrite: true
 }));
 
-// Define a function that manages a session for a GET request.
-const getSessionManager = (req, res, next) => {
-  if (req.session.id) {
-    const originalCookie = cryptr.decrypt(req.cookies.userData);
-    try {
-      req.session = JSON.parse(originalCookie);
-    }
-    catch (err) {
-      handleMessage(messages, 'badcookie');
-    }
-  }
-  next();
-};
-
-// Define a function that manages a session for a POST request.
-const postSessionManager = (req, res, next) => {
-  if (req.body.firstName) {
-    req.session = req.body;
-    // Store the submitted data in a cookie for 60 days.
-    res.cookie(
-      'userData', cryptr.encrypt(JSON.stringify(req.body)), {maxAge: 5184000000}
-    );
-  }
-  else if (req.body.clearInfo) {
-    res.clearCookie('userData');
-  }
-  next();
-};
-
 // /// REQUEST ROUTES /// ///
 
-// Render the appropriate home page.
+// Home page.
 app.get(
   '/',
   (req, res) => {
-    if (req.session.isPopulated) {
-      const cn = {
-        host: 'localhost',
-        port: 5432,
-        user: 'pgauthmanager',
-        database: 'pgauth'
-      };
-      const db = pgp(cn);
-      db.task('get user data', task => {
-        return task.one(
-          'select id, pwhash from users where id = req.session.id'
-        );
+    userEmail(req)
+      .then(email => {
+        if (email) {
+          res.end(memberHome(email));
+        }
+        else {
+          res.end(anonHome());
+        }
       })
-      .then((id, pwhash) => {
-        
-      })
-      const dbschema = pgp(cnschema);
-      res.end(knownForm(
-        userData.firstName, userData.lastName, userData.favoriteColor
-      ));
-    }
-    else {
-      res.send(anonForm());
-    }
+      .catch(err => {
+        errorHandlerFn(err);
+      });
   }
 );
 
-// Handle a form submission.
-app.post(
-  '/',
-  cookieParser(),
-  formParser,
-  postSessionManager,
+// Registration form.
+app.get(
+  '/register',
   (req, res) => {
-    // Handle the non-personalized (information-submission) form.
-    if (req.body.firstName) {
-      // Respond with the personalized form.
+    userEmail(req)
+      .then(email => {
+        if (email) {
+          res.end(memberHome(email));
+        }
+        else {
+          res.end(registrationForm());
+        }
+      })
+      .catch(err => {
+        errorHandlerFn(err);
+      });
+  }
+);
+
+// Login form.
+app.get(
+  '/login',
+  (req, res) => {
+    userEmail(req)
+      .then(email => {
+        if (email) {
+          res.end(memberHome(email));
+        }
+        else {
+          res.end(loginForm());
+        }
+      })
+      .catch(err => {
+        errorHandlerFn(err);
+      });
+  }
+);
+
+// Logout.
+app.get(
+  '/logout',
+  (req, res) => {
+    userEmail(req)
+      .then(email => {
+        if (email) {
+          req.session = null;
+          res.end(anonHome());
+        }
+        else {
+          res.end(anonHome());
+        }
+      })
+      .catch(err => {
+        errorHandlerFn(err);
+      });
+  }
+);
+
+// Registration form submission.
+app.post(
+  '/register',
+  formParser,
+  (req, res) => {
+    if (req.body.email) {
       res.send(knownForm(
         req.body.firstName, req.body.lastName, req.body.favoriteColor
       ));
