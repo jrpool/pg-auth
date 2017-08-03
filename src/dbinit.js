@@ -47,12 +47,12 @@ dbmake.task('dbmake', task => {
         const queries = new pgp.QueryFile('../sql/schema.sql');
         return task.none(queries);
       })
-      .catch(err => {
-        handleMessage(
-          messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
-        );
-        pgp.end();
-      });
+        .catch(err => {
+          handleMessage(
+            messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
+          );
+          pgp.end();
+        });
     })
     .then(() => {
       pgp.end();

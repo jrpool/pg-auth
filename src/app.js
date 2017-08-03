@@ -8,7 +8,7 @@ const cookieSession = require('cookie-session');
 const pgp = require('pg-promise')();
 const bcryptjs = require('bcryptjs');
 const {handleMessage, errorHandlerFn, messages} = require('./messages');
-const {isPositiveInt, isPositiveIntRange} = require('./validate');
+const {isPositiveInt} = require('./validate');
 
 // /// DOCUMENT TEMPLATES /// ///
 
@@ -55,7 +55,7 @@ const registrationForm = error => {
           <input
             name='email' type='email' size='60'
             minlength='5' maxlength='60'
-            placeholder='${emailholder}'
+            placeholder='${messages.emailholder}'
           >
         </label>
       </p>
@@ -118,7 +118,7 @@ const loginForm = error => {
 // /// UTILITIES /// //
 
 // Define a function that creates and returns a database instance.
-const db = () => {
+const pgauthdb = () => {
   const cn = {
     host: 'localhost',
     port: 5432,
@@ -133,16 +133,16 @@ const db = () => {
   address if logged in, or null if not.
 */
 const userEmail = req => {
-  const db = db();
+  const db = pgauthdb();
   if (
     req.session.isPopulated && req.session.id && isPositiveInt(req.session.id)
   ) {
     return db.task('get user email from database', task => {
       return task.one('select email from users where id = ' + req.session.id);
     })
-    .catch(err => {
-      errorHandlerFn(err);
-    }
+      .catch(err => {
+        errorHandlerFn(err);
+      });
   }
 };
 
@@ -243,13 +243,13 @@ app.post(
   formParser,
   (req, res) => {
     if (req.body.email) {
-      res.send(knownForm(
+      res.send(memberHome(
         req.body.firstName, req.body.lastName, req.body.favoriteColor
       ));
     }
     // Handle the personalized (cookie-clearing) form.
     else if (req.body.clearInfo) {
-      res.send(anonForm());
+      res.send(anonHome());
     }
   }
 );
