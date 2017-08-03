@@ -19,15 +19,15 @@ const queries = [
 // Delete the database and its owner.
 db.task('dbinit', task => {
   return task.none(queries[0])
-    .then(() => {return task.none(queries[1]);})
-    .then(() => {
-      pgp.end();
-      handleMessage(messages, 'dbdropped');
-    })
-    .catch(err => {
-      handleMessage(
-        messages, 'error', errorHandlerFn(err), ['«unit»', 'dbdrop']
-      );
-      pgp.end();
-    });
+  .then(() => {return task.none(queries[1]);})
+  .then(() => {
+    pgp.end();
+    handleMessage(messages, 'dbdropped');
+  })
+  .catch(err => {
+    handleMessage(
+      messages, 'error', errorHandlerFn(err), ['«unit»', 'dbdrop']
+    );
+    pgp.end();
+  });
 });

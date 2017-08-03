@@ -34,29 +34,18 @@ const queries = [
 */
 dbmake.task('dbmake', task => {
   return task.none(queries[0])
-    .then(() => {return task.none(queries[1]);})
-    .then(() => {return task.none(queries[2]);})
-    .then(() => {return task.none(queries[3]);})
-    .then(() => {
-      dbmake.$pool.end;
-      return handleMessage(messages, 'dbmade');
-    })
-    .then(() => {
-      // Create the database schema.
-      return dbschema.task('dbschema', task => {
-        const queries = new pgp.QueryFile('../sql/schema.sql');
-        return task.none(queries);
-      })
-        .catch(err => {
-          handleMessage(
-            messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
-          );
-          pgp.end();
-        });
-    })
-    .then(() => {
-      pgp.end();
-      return handleMessage(messages, 'dbfilled');
+  .then(() => {return task.none(queries[1]);})
+  .then(() => {return task.none(queries[2]);})
+  .then(() => {return task.none(queries[3]);})
+  .then(() => {
+    dbmake.$pool.end;
+    return handleMessage(messages, 'dbmade');
+  })
+  .then(() => {
+    // Create the database schema.
+    return dbschema.task('dbschema', task => {
+      const queries = new pgp.QueryFile('../sql/schema.sql');
+      return task.none(queries);
     })
     .catch(err => {
       handleMessage(
@@ -64,4 +53,15 @@ dbmake.task('dbmake', task => {
       );
       pgp.end();
     });
+  })
+  .then(() => {
+    pgp.end();
+    return handleMessage(messages, 'dbfilled');
+  })
+  .catch(err => {
+    handleMessage(
+      messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
+    );
+    pgp.end();
+  });
 });

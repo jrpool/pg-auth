@@ -2,7 +2,7 @@
 
 const app = require('express')();
 const formParser = require('body-parser').urlencoded(
-  {extended: false, inflate: false, limit: 300, parameterLimit: 3}
+  {extended: false, inflate: false, limit: 300, parameterLimit: 4}
 );
 const cookieSession = require('cookie-session');
 const pgp = require('pg-promise')();
@@ -37,17 +37,19 @@ const memberHome = email => {
   const bodyContent = `<h3>
     ${handleMessage(messages, 'knowngreet', '=', ['«email»', email])}
     </h3>\n
-    <h4><a href='/logout'>${handleMessage(messages, 'logout')}</a></h4>\n`;
+    <h4><a href='/logout'>${messages.logout}</a></h4>\n`;
   return htmlDoc(messages.knownhome, bodyContent);
 };
 
 // Define a function that returns the registration form.
 const registrationForm = error => {
   const bodyContent = `<h3>${messages.regpage}</h3>\n
-    ${error ? '<h2>' + error + '</h2>\n' : ''}
+    ${error ?
+      '<h2 style="color: red">' + error + '</h2>\n' : ''
+    }
     <form
       name='registration'
-      action='/registration'
+      action='/register'
       method='post'
     >\n\n
       <p>
@@ -130,7 +132,7 @@ const pgauthdb = () => {
 
 /*
   Define a function that returns a promise resolved with the user’s email
-  address if logged in, or null if not.
+  address if logged in, or with a blank string if not.
 */
 const userEmail = req => {
   const db = pgauthdb();
@@ -138,12 +140,41 @@ const userEmail = req => {
     req.session.isPopulated && req.session.id && isPositiveInt(req.session.id)
   ) {
     return db.task('get user email from database', task => {
-      return task.one('select email from users where id = ' + req.session.id);
+      return task.func('getemail', req.session.id);
     })
-      .catch(err => {
-        errorHandlerFn(err);
-      });
+    .then(() => {pgp.end();})
+    .catch(err => {
+      errorHandlerFn(err);
+      pgp.end();
+    });
   }
+  else {
+    pgp.end();
+    return Promise.resolve('');
+  }
+};
+
+/*
+  Define a function that adds a user to the database if the email address
+  is nonduplicative and returns a promise resolved with the user’s ID if
+  added, or 0 if not.
+  Preconditions: req.session.email and req.session.password are valid strings.
+*/
+const storeNewUser = req => {
+  const db = pgauthdb();
+  const salt = bcryptjs.genSaltSync(10);
+  const pwhash = bcryptjs.hashSync(req.body.password, salt);
+  return db.task('add user to database', task => {
+    return task.func('adduser', [req.body.email, pwhash]);
+  })
+  .then(addedUser => {
+    pgp.end();
+    return Promise.resolve(addedUser[0].newid || 0);
+  })
+  .catch(err => {
+    errorHandlerFn(err);
+    pgp.end();
+  });
 };
 
 // Configure session management for secure 60-day cookies.
@@ -158,24 +189,24 @@ app.use(cookieSession({
   overwrite: true
 }));
 
-// /// REQUEST ROUTES /// ///
+// /// ROUTES /// ///
 
 // Home page.
 app.get(
   '/',
   (req, res) => {
     userEmail(req)
-      .then(email => {
-        if (email) {
-          res.end(memberHome(email));
-        }
-        else {
-          res.end(anonHome());
-        }
-      })
-      .catch(err => {
-        errorHandlerFn(err);
-      });
+    .then(email => {
+      if (email) {
+        res.end(memberHome(email));
+      }
+      else {
+        res.end(anonHome());
+      }
+    })
+    .catch(err => {
+      errorHandlerFn(err);
+    });
   }
 );
 
@@ -184,17 +215,17 @@ app.get(
   '/register',
   (req, res) => {
     userEmail(req)
-      .then(email => {
-        if (email) {
-          res.end(memberHome(email));
-        }
-        else {
-          res.end(registrationForm());
-        }
-      })
-      .catch(err => {
-        errorHandlerFn(err);
-      });
+    .then(email => {
+      if (email) {
+        res.end(memberHome(email));
+      }
+      else {
+        res.end(registrationForm());
+      }
+    })
+    .catch(err => {
+      errorHandlerFn(err);
+    });
   }
 );
 
@@ -203,17 +234,17 @@ app.get(
   '/login',
   (req, res) => {
     userEmail(req)
-      .then(email => {
-        if (email) {
-          res.end(memberHome(email));
-        }
-        else {
-          res.end(loginForm());
-        }
-      })
-      .catch(err => {
-        errorHandlerFn(err);
-      });
+    .then(email => {
+      if (email) {
+        res.end(memberHome(email));
+      }
+      else {
+        res.end(loginForm());
+      }
+    })
+    .catch(err => {
+      errorHandlerFn(err);
+    });
   }
 );
 
@@ -222,18 +253,18 @@ app.get(
   '/logout',
   (req, res) => {
     userEmail(req)
-      .then(email => {
-        if (email) {
-          req.session = null;
-          res.end(anonHome());
-        }
-        else {
-          res.end(anonHome());
-        }
-      })
-      .catch(err => {
-        errorHandlerFn(err);
-      });
+    .then(email => {
+      if (email) {
+        req.session = null;
+        res.end(anonHome());
+      }
+      else {
+        res.end(anonHome());
+      }
+    })
+    .catch(err => {
+      errorHandlerFn(err);
+    });
   }
 );
 
@@ -242,14 +273,33 @@ app.post(
   '/register',
   formParser,
   (req, res) => {
-    if (req.body.email) {
-      res.send(memberHome(
-        req.body.firstName, req.body.lastName, req.body.favoriteColor
-      ));
+    if (!req.body.email || req.body.email.length < 5) {
+      res.end(registrationForm(messages.noemail));
     }
-    // Handle the personalized (cookie-clearing) form.
-    else if (req.body.clearInfo) {
-      res.send(anonHome());
+    else if (!req.body.password || req.body.password.length < 5) {
+      res.end(registrationForm(messages.nopw0));
+    }
+    else if (!req.body.repassword || req.body.repassword.length < 5) {
+      res.end(registrationForm(messages.nopw1));
+    }
+    else if (req.body.repassword !== req.body.password) {
+      res.end(registrationForm(messages.badpw1));
+    }
+    else {
+      storeNewUser(req)
+      .then(newid => {
+        if (newid) {
+          req.session.id = newid;
+          res.end(memberHome(req.body.email));
+        }
+        else {
+          req.session = null;
+          res.end(anonHome());
+        }
+      })
+      .catch(err => {
+        errorHandlerFn(err);
+      });
     }
   }
 );

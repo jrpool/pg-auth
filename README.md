@@ -55,7 +55,11 @@ Make that parent directory your working directory, by executing, for example:
 
 ## Usage and Examples
 
-To start the application, execute `npm start`.
+To create the database and its owner, including its schema, execute `npm run dbinit`.
+
+To delete the database and its owner, execute `npm run dbdrop`.
+
+While the database exists, to start the application, execute `npm start`.
 
 To access the application while it is running, use a web browser to request this URL:
 
