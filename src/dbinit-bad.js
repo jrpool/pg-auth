@@ -38,22 +38,27 @@ dbmake.task('dbmake', task => {
     .then(() => {return task.none(queries[2]);})
     .then(() => {return task.none(queries[3]);})
     .then(() => {
-      dbmake.$pool.end;
+      pgp.end();
       return handleMessage(messages, 'dbmade');
     })
-    .then(() => {
-      // Create the database schema.
-      return dbschema.task('dbschema', task => {
-        task.none(new pgp.QueryFile('../src/schema.sql'));
-      });
-    })
+    .catch(err => {
+      handleMessage(
+        messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
+      );
+      pgp.end();
+    });
+});
+
+// Create the database schema.
+dbschema.task('dbschema', task => {
+  return task.none(new pgp.QueryFile('../src/schema.sql'))
     .then(() => {
       pgp.end();
       return handleMessage(messages, 'dbfilled');
     })
     .catch(err => {
       handleMessage(
-        messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
+        messages, 'error', errorHandlerFn(err), ['«unit»', 'dbschema']
       );
       pgp.end();
     });
