@@ -59,8 +59,9 @@ exports.messages = {
   'shortpw': 'Your proposed password is too short.',
   'bademail': 'The address is not a valid email address.',
   'badlogins': 'The email address or password is incorrect.',
-  'dbinit': 'The database and its owner have been created.',
-  'dbdrop': 'The database and its owner have been deleted.',
+  'dbmade': 'The database and its owner have been created.',
+  'dbfilled': 'The database schema has been created.',
+  'dbdropped': 'The database and its owner have been deleted.',
   'error': 'An error has occurred in «unit». Error message:\n',
   'badcookie': 'The cookie in a request was not decryptable.'
 };

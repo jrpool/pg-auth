@@ -2,19 +2,15 @@
 const app = require('express')();
 
 // Import required modules.
-const fs = require('fs');
 const formParser = require('body-parser').urlencoded(
   {extended: false, inflate: false, limit: 300, parameterLimit: 3}
 );
 const cookieSession = require('cookie-session');
 const bcryptjs = require('bcryptjs');
 const {handleMessage, errorHandlerFn, messages} = require('./messages');
+const pgp = require('pg-promise')();
 
-// Retrieve or define the encryption key.
-const key = fs.readFileSync('./key.txt', 'utf8') || 'cookieencryptionkey';
-
-// Create an encryption/decryption object.
-const cryptr = new Cryptr(key);
+// /// DOCUMENT TEMPLATES /// ///
 
 // Define a function that returns an HTML document.
 const htmlDoc = (title, bodyContent) =>
@@ -119,9 +115,23 @@ const loginForm = error => {
   return htmlDoc(${messages.logpage}, bodyContent);
 };
 
+// /// SESSION MANAGEMENT /// //
+
+// Configure session management for secure 60-day cookies.
+app.use(cookieSession({
+  name: 'session',
+  secret: 'How secret can it be if it is here?',
+  maxAge: 5184000000,
+  path: '/',
+  sameSite: 'strict',
+  httpOnly: true,
+  signed: true,
+  overwrite: true
+}));
+
 // Define a function that manages a session for a GET request.
 const getSessionManager = (req, res, next) => {
-  if (req.cookies.userData) {
+  if (req.session.id) {
     const originalCookie = cryptr.decrypt(req.cookies.userData);
     try {
       req.session = JSON.parse(originalCookie);
@@ -148,17 +158,15 @@ const postSessionManager = (req, res, next) => {
   next();
 };
 
-/// /// REQUEST ROUTES /// ///
+// /// REQUEST ROUTES /// ///
 
-// Render the appropriate form.
+// Render the appropriate home page.
 app.get(
   '/',
-  cookieParser(),
-  getSessionManager,
   (req, res) => {
-    if (req.session) {
-      const userData = req.session;
-      res.send(knownForm(
+    if (req.session.isPopulated) {
+
+      res.end(knownForm(
         userData.firstName, userData.lastName, userData.favoriteColor
       ));
     }
