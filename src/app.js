@@ -165,7 +165,22 @@ app.get(
   '/',
   (req, res) => {
     if (req.session.isPopulated) {
-
+      const cn = {
+        host: 'localhost',
+        port: 5432,
+        user: 'pgauthmanager',
+        database: 'pgauth'
+      };
+      const db = pgp(cn);
+      db.task('get user data', task => {
+        return task.one(
+          'select id, pwhash from users where id = req.session.id'
+        );
+      })
+      .then((id, pwhash) => {
+        
+      })
+      const dbschema = pgp(cnschema);
       res.end(knownForm(
         userData.firstName, userData.lastName, userData.favoriteColor
       ));

@@ -44,7 +44,14 @@ dbmake.task('dbmake', task => {
     .then(() => {
       // Create the database schema.
       return dbschema.task('dbschema', task => {
-        task.none(new pgp.QueryFile('../src/schema.sql'));
+        const queries = new pgp.QueryFile('../sql/schema.sql');
+        return task.none(queries);
+      })
+      .catch(err => {
+        handleMessage(
+          messages, 'error', errorHandlerFn(err), ['«unit»', 'dbmake']
+        );
+        pgp.end();
       });
     })
     .then(() => {

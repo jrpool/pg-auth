@@ -22,7 +22,7 @@ db.task('dbinit', task => {
     .then(() => {return task.none(queries[1]);})
     .then(() => {
       pgp.end();
-      handleMessage(messages, 'dbdrop');
+      handleMessage(messages, 'dbdropped');
     })
     .catch(err => {
       handleMessage(

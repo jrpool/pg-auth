@@ -1,29 +1,27 @@
 create table users (
-  id serial,
-  ident integer primary key,
-  email text not null,
+  id serial primary key,
+  email text not null unique,
   pwhash text not null
 );
 
 comment on table users is 'registered users';
-comment on column users.id is 'ID base';
-comment on column users.ident is 'ID';
+comment on column users.id is 'ID';
 comment on column users.email is 'email address';
 comment on column users.pwhash is 'bcrypt hash with salt of password';
 
-create function adduser(newemail text, newpwhash text, out newident integer)
+create function adduser(newemail text, newpwhash text, out newid integer)
   returns integer language plpgsql as $$
-    setseed(sin(currenttime);
-    newid := insert into users (email, pwhash) values (newemail, newpwhash)
-      returning id;
-    newident := update users set ident = trunc(1000 * (id + random()))
-      where id = newid;
+    begin
+    perform setseed(sin(currenttime));
+    insert into users (email, pwhash) values (newemail, newpwhash)
+      returning id into newid;
     return;
+    end;
   $$;
 
-create function getemail(reqident integer, out dbemail text)
+create function getemail(reqid integer, out dbemail text)
   returns text language sql as $$
-    select email as dbemail from users where ident = reqident;
+    select email as dbemail from users where id = reqid;
   $$;
 
 create function getpwhash(reqemail text, out dbpwhash text)
