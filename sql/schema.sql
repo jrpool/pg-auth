@@ -12,9 +12,14 @@ comment on column users.pwhash is 'bcrypt hash with salt of password';
 create function adduser(newemail text, newpwhash text, out newid integer)
   returns integer language plpgsql as $$
     begin
-    newid := 0;
-    insert into users (email, pwhash) values (newemail, newpwhash)
+    select id into newid from users where email = newemail;
+    if newid is not null
+    then
+      newid := 0;
+    else
+      insert into users (email, pwhash) values (newemail, newpwhash)
       on conflict do nothing returning id into newid;
+    end if;
     return;
     end;
   $$;

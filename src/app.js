@@ -142,7 +142,10 @@ const userEmail = req => {
     return db.task('get user email from database', task => {
       return task.func('getemail', req.session.id);
     })
-    .then(() => {pgp.end();})
+    .then(foundUser => {
+      pgp.end();
+      return Promise.resolve(foundUser[0].dbemail || '');
+    })
     .catch(err => {
       errorHandlerFn(err);
       pgp.end();
@@ -217,7 +220,7 @@ app.get(
     userEmail(req)
     .then(email => {
       if (email) {
-        res.end(memberHome(email));
+        res.redirect(301, '/');
       }
       else {
         res.end(registrationForm());
@@ -236,7 +239,7 @@ app.get(
     userEmail(req)
     .then(email => {
       if (email) {
-        res.end(memberHome(email));
+        res.redirect(301, '/');
       }
       else {
         res.end(loginForm());
@@ -259,7 +262,7 @@ app.get(
         res.end(anonHome());
       }
       else {
-        res.end(anonHome());
+        res.redirect(301, '/');
       }
     })
     .catch(err => {
@@ -293,7 +296,6 @@ app.post(
           res.end(memberHome(req.body.email));
         }
         else {
-          req.session = null;
           res.end(anonHome());
         }
       })
