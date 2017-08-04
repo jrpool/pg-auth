@@ -44,9 +44,7 @@ const memberHome = email => {
 // Define a function that returns the registration form.
 const registrationForm = error => {
   const bodyContent = `<h3>${messages.regpage}</h3>\n
-    ${error ?
-      '<h2 style="color: red">' + error + '</h2>\n' : ''
-    }
+    ${error ? '<h2 style="color: red">' + error + '</h2>\n' : ''}
     <form
       name='registration'
       action='/register'
@@ -180,6 +178,63 @@ const storeNewUser = req => {
   });
 };
 
+/*
+  Define a function that deletes a user from the database if the ID is the
+  ID of a user and returns a promise resolved with a boolean value, true if
+  deleted or false if not.
+*/
+const deleteUser = req => {
+  const db = pgauthdb();
+  return db.task('delete user from database', task => {
+    if (!req.session.id) {
+      return Promise.resolve(false);
+    }
+    else {
+      return task.func('deleteuser', req.session.id)
+      .then(deletedUser => {
+        pgp.end();
+        return Promise.resolve(deletedUser[0].deleted);
+      })
+      .catch(err => {
+        errorHandlerFn(err);
+        pgp.end();
+      });
+    }
+  });
+};
+
+/*
+  Define a function that returns a promise resolved with an integer, the ID
+  of the user submitting the login form if the submitted credentials are
+  valid, or 0 if not.
+  Preconditions: req.session.email and req.session.password are valid strings.
+*/
+const checkUser = req => {
+  const db = pgauthdb();
+  return db.task('validate login', task => {
+    return task.func('getidpwhash', req.body.email);
+  })
+  .then(foundUser => {
+    pgp.end();
+    if (foundUser.length !== 1) {
+      return Promise.resolve(0);
+    }
+    else {
+      const userData = foundUser[0];
+      if (bcryptjs.compareSync(req.body.password, userData.dbpwhash)) {
+        return Promise.resolve(userData.dbid);
+      }
+      else {
+        return Promise.resolve(0);
+      }
+    }
+  })
+  .catch(err => {
+    errorHandlerFn(err);
+    pgp.end();
+  });
+};
+
 // Configure session management for secure 60-day cookies.
 app.use(cookieSession({
   name: 'session',
@@ -220,7 +275,7 @@ app.get(
     userEmail(req)
     .then(email => {
       if (email) {
-        res.redirect(301, '/');
+        res.redirect(302, '/');
       }
       else {
         res.end(registrationForm());
@@ -239,7 +294,7 @@ app.get(
     userEmail(req)
     .then(email => {
       if (email) {
-        res.redirect(301, '/');
+        res.redirect(302, '/');
       }
       else {
         res.end(loginForm());
@@ -251,19 +306,16 @@ app.get(
   }
 );
 
-// Logout.
+// Logout request.
 app.get(
   '/logout',
   (req, res) => {
-    userEmail(req)
-    .then(email => {
-      if (email) {
+    deleteUser(req)
+    .then(deleted => {
+      if (deleted) {
         req.session = null;
-        res.end(anonHome());
       }
-      else {
-        res.redirect(301, '/');
-      }
+      res.redirect(302, '/');
     })
     .catch(err => {
       errorHandlerFn(err);
@@ -293,11 +345,34 @@ app.post(
       .then(newid => {
         if (newid) {
           req.session.id = newid;
-          res.end(memberHome(req.body.email));
         }
-        else {
-          res.end(anonHome());
+        res.redirect(302, '/');
+      })
+      .catch(err => {
+        errorHandlerFn(err);
+      });
+    }
+  }
+);
+
+// Login form submission.
+app.post(
+  '/login',
+  formParser,
+  (req, res) => {
+    if (!req.body.email || req.body.email.length < 5) {
+      res.end(loginForm(messages.noemail));
+    }
+    else if (!req.body.password || req.body.password.length < 5) {
+      res.end(loginForm(messages.nopw));
+    }
+    else {
+      checkUser(req)
+      .then(dbid => {
+        if (dbid) {
+          req.session.id = dbid;
         }
+        res.redirect(302, '/');
       })
       .catch(err => {
         errorHandlerFn(err);

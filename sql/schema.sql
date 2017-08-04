@@ -24,12 +24,21 @@ create function adduser(newemail text, newpwhash text, out newid integer)
     end;
   $$;
 
+create function deleteuser(reqid integer, out deleted boolean)
+  returns boolean language plpgsql as $$
+    begin
+    delete from users where id = reqid;
+    deleted := found;
+    return;
+    end;
+  $$;
+
 create function getemail(reqid integer, out dbemail text)
   returns text language sql as $$
     select email as dbemail from users where id = reqid;
   $$;
 
-create function getpwhash(reqemail text, out dbpwhash text)
-  returns text language sql as $$
-    select pwhash as dbpwhash from users where email = reqemail;
+create function getidpwhash(reqemail text, out dbid integer, out dbpwhash text)
+  returns record language sql as $$
+    select id as dbid, pwhash as dbpwhash from users where email = reqemail;
   $$;
