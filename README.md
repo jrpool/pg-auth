@@ -19,7 +19,9 @@ This application demonstrates the use of the [`express` package][exp], the [`coo
 
 The demonstration takes the form of a website that allows a user to register and, thereafter, serves personalized content to that user.
 
-The application contains only a subset of the functions that an authentication management application requires. Missing functionalities include terminating the user’s registration, changing the user’s password, changing the user’s email address, protecting the registrant from impersonation, and reminding the registered user of a forgotten password or email address.
+The application contains only a subset of the functions that an authentication management application requires. Missing functionalities include logging out without terminating the user’s registration, changing the user’s password, changing the user’s email address, protecting the registrant from impersonation, and reminding the registered user of a forgotten password or email address.
+
+The concept of “logging out” can be variously interpreted. In this implementation, a logout action by a user deletes the user’s registration in the application’s database and causes the application to delete the authentication cookie in the user’s web browser, so further use of the application will require registering again.
 
 The application fulfills the requirements of the “HTTP Authentication” module in Phase 2 of the [Learners Guild][lg] curriculum.
 
