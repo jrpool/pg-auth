@@ -85,7 +85,7 @@ const registrationForm = error => {
 // Define a function that returns the login form.
 const loginForm = error => {
   const bodyContent = `<h3>${messages.logpage}</h3>\n
-    ${error ? '<h2>' + error + '</h2>\n' : ''}
+    ${error ? '<h2 style="color: red">' + error + '</h2>\n' : ''}
     <form
       name='login'
       action='/login'
