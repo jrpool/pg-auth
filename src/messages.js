@@ -47,7 +47,7 @@ exports.messages = {
   'pw1': 'The same new password again',
   'reg': 'Register',
   'login': 'Log in',
-  'logout': 'Log out',
+  'logout': 'Log out (i.e. delete registration)',
   'nopw': 'Missing password.',
   'nopw0': 'Missing new password.',
   'nopw1': 'Missing password repetition.',
