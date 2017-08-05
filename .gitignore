@@ -7,6 +7,3 @@ node_modules
 
 # Developer notes
 private/
-
-# Secret files
-key.txt
